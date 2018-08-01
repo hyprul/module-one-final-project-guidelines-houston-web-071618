@@ -171,7 +171,7 @@ find_all_songs_for_uploads(service, 'snippet,contentDetails',
   playlist_id: 'UUANLZYMidaCbLQFWXBC95Jg',
   )
 
-binding.pry
+#binding.pry
 
 
 #parsed["items"][0]["snippet"]["title"]

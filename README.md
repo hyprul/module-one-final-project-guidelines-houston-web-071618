@@ -1,49 +1,131 @@
-# Module One Final Project Guidelines
+# Youtube CLI
 
-Congratulations, you're at the end of module one! You've worked crazy hard to get here and have learned a ton.
+We created a Youtube CLI that displays and interacts with  Justin Bieber and Taylor Swift's channels, playlists, and videos through Youtube's Data API. We pulled 20 videos from each of the artist's uploads playlist along with pertinent information such as title, views, and subscriber count. Our CLI allows access to view and manipulate our database through ActiveRecord.
 
-For your final project, we'll be building a Command Line database application.
+## Youtube API requirements
 
-## Project Requirements
+Follow the instructions at 
+https://developers.google.com/youtube/v3/quickstart/ruby
+to install the Google Client Library through the following command.
 
-### Option One - Data Analytics Project
+```
+gem install google-api-client
+```
 
-1. Access a Sqlite3 Database using ActiveRecord.
-2. You should have at minimum three models including one join model. This means you must have a many-to-many relationship.
-3. You should seed your database using data that you collect either from a CSV, a website by scraping, or an API.
-4. Your models should have methods that answer interesting questions about the data. For example, if you've collected info about movie reviews, what is the most popular movie? What movie has the most reviews?
-5. You should provide a CLI to display the return values of your interesting methods.  
-6. Use good OO design patterns. You should have separate classes for your models and CLI interface.
+### Installing All Gems through Bundle
 
-### Option Two - Command Line CRUD App
+Run bundle install in terminal to install all required Ruby gems for the program.
 
-1. Access a Sqlite3 Database using ActiveRecord.
-2. You should have a minimum of three models.
-3. You should build out a CLI to give your user full CRUD ability for at least one of your resources. For example, build out a command line To-Do list. A user should be able to create a new to-do, see all todos, update a todo item, and delete a todo. Todos can be grouped into categories, so that a to-do has many categories and categories have many to-dos.
-4. Use good OO design patterns. You should have separate models for your runner and CLI interface.
+```
+bundle install
+```
 
-### Brainstorming and Proposing a Project Idea
+## How to seed data and execute CLI
 
-Projects need to be approved prior to launching into them, so take some time to brainstorm project options that will fulfill the requirements above.  You must have a minimum of four [user stories](https://en.wikipedia.org/wiki/User_story) to help explain how a user will interact with your app.  A user story should follow the general structure of `"As a <role>, I want <goal/desire> so that <benefit>"`. In example, if we were creating an app to randomly choose nearby restaurants on Yelp, we might write:
+To seed data to a new database, enter the following command into terminal.
+```
+rake db:migrate
+ruby youtube/api.rb
+```
 
-* As a user, I want to be able to enter my name to retrieve my records
-* As a user, I want to enter a location and be given a random nearby restaurant suggestion
-* As a user, I should be able to reject a suggestion and not see that restaurant suggestion again
-* As a user, I want to be able to save to and retrieve a list of favorite restaurant suggestions
+To execute the CLI
+```
+ruby bin/run.rb
+```
 
-## Instructions
+## Models & Schema
 
-1. Fork and clone this repository.
-2. Build your application. Make sure to commit early and commit often. Commit messages should be meaningful (clearly describe what you're doing in the commit) and accurate (there should be nothing in the commit that doesn't match the description in the commit message). Good rule of thumb is to commit every 3-7 mins of actual coding time. Most of your commits should have under 15 lines of code and a 2 line commit is perfectly acceptable.
-3. Make sure to create a good README.md with a short description, install instructions, a contributors guide and a link to the license for your code.
-4. Make sure your project checks off each of the above requirements.
-5. Prepare a video demo (narration helps!) describing how a user would interact with your working project.
-    * The video should:
-      - Have an overview of your project.(2 minutes max)
-6. Prepare a presentation to follow your video.(3 minutes max)
-    * Your presentation should:
-      - Describe something you struggled to build, and show us how you ultimately implemented it in your code.
-      - Discuss 3 things you learned in the process of working on this project.
-      - Address, if anything, what you would change or add to what you have today?
-      - Present any code you would like to highlight.   
-7. *OPTIONAL, BUT RECOMMENDED*: Write a blog post about the project and process.
+We have 4 model classes called Channel, Playlist, User, and Video. The Video class joins Playlist and User. The Channel class has many playlists.
+
+```
+class Channel < ActiveRecord::Base
+	has_many :playlists
+end
+```
+
+```
+class Playlist < ActiveRecord::Base
+	belongs_to :channel
+	has_many :videos
+	has_many :users, through: :videos
+end
+```
+
+```
+class User < ActiveRecord::Base
+	has_many :videos
+	has_many :playlists, through: :videos
+end
+```
+
+```
+class Video < ActiveRecord::Base
+	belongs_to :user
+	belongs_to :playlist
+end
+```
+
+```
+ActiveRecord::Schema.define(version: 20180802140820) do
+
+  create_table "channels", force: :cascade do |t|
+    t.string "name"
+    t.float  "views"
+    t.float  "subscribers"
+  end
+
+  create_table "playlists", force: :cascade do |t|
+    t.string  "name"
+    t.integer "channel_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "first_name"
+    t.string "last_name"
+  end
+
+  create_table "videos", force: :cascade do |t|
+    t.string  "name"
+    t.integer "user_id"
+    t.integer "playlist_id"
+    t.float   "views"
+  end
+
+end
+```
+
+### CLI Commands
+
+Below are the available commands to interact with our program through terminal. 
+
+```
+	- help : displays this help message
+	- channels : display all available channels
+	- greetbieber: Greet Bieber!
+	- greettaylor: Greet Taylor!
+	- bestsongofalltime: display the most viewed song of all time
+	- bieberplaylist : display all of Justin Bieber's playlists
+	- taylorplaylist : display all of Taylor Swift's playlists
+	- biebersongs: display all of Bieber's songs
+	- taylorsongs: display all of Taylor's songs
+	- destroybieber: destroy Biebz
+	- exit: exit the CLI
+```
+
+## Built With
+
+Blood, sweat, and tears.
+
+## Authors
+
+* Kenny Yang - https://github.com/kennyyang17
+
+* Sean Huang - https://github.com/hyprul
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments
+
+Michael, Humzah, Joshua, Graham

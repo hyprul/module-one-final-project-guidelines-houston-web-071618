@@ -12,7 +12,6 @@ require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'json'
 require 'pry'
-
 require 'fileutils'
 
 # REPLACE WITH VALID REDIRECT_URI FOR YOUR CLIENT
@@ -55,77 +54,66 @@ service = Google::Apis::YoutubeV3::YouTubeService.new
 service.client_options.application_name = APPLICATION_NAME
 service.authorization = authorize
 
-# Print response object as JSON
-def print_results(response, playlist, user)
+# 
+def create_videos(response, playlist, user, service)
   temp =  response.to_json
   parsed = JSON.parse(temp)
-  fixed = parsed["items"].map do |hash|
-    #binding.pry
-    hash["snippet"]["title"]
+  #binding.pry
+
+  parsed["items"].each do |hash|
+      id = hash["contentDetails"]["videoId"]
+      count = getvideoviewcount(service, 'snippet,contentDetails,statistics',
+  id: id)
+      #binding.pry
+      title = hash["snippet"]["title"]
+      Video.create(name: title, playlist: playlist, user: user, views: count)
+      #binding.pry
   end
-
-  fixed.each do |video_name|
-    #playlist.videos << Video.create(name: video_name)
-    Video.create(name: video_name, playlist: playlist, user: user)
-    #binding.pry
-  end
-
-
-  #create_resource()
-  #puts parsed
   
 end
 
 
-### END BOILERPLATE CODE
 
-# Sample ruby code for search.list
-
-#SIMPLE SEARCH BY TITLE
-def search_list_by_keyword(service, part, **params)
+#GRAB VIEWCOUNT OF VIDEO
+def getvideoviewcount(service, part, **params)
   params = params.delete_if { |p, v| v == ''}
-  response = service.list_searches(part, params)
-  #print_results(response)
-end
+  response = service.list_videos(part, params)
+  temp =  response.to_json
+  parsed = JSON.parse(temp)
+  parsed["items"][0]["statistics"]["viewCount"]
 
-search_response = search_list_by_keyword(service, 'snippet',
-  max_results: 25,
-  q: 'best underwater fire basket weaving hodor hodor',
-  type: '')
+end
 
 
 
 
 
 #LIST ALL INFO ABOUT CHANNEL BY ID
-def channels_list_by_id(service, part, **params)
+def create_channel_by_id(service, part, **params)
   params = params.delete_if { |p, v| v == ''}
   response = service.list_channels(part, params)
-  #binding.pry
-  #print_results(response)
+  temp = response.to_json
+  parsed = JSON.parse(temp)
+  channelname = parsed["items"][0]["snippet"]["customUrl"]
+  subscribers = parsed["items"][0]["statistics"]["subscriberCount"]
+  views = parsed["items"][0]["statistics"]["viewCount"]
+  Channel.create(name: channelname, subscribers: subscribers, views: views  )
+ 
 end
 
-#channels_list_by_id(service, 'snippet,contentDetails,statistics',
-  #id: 'UCHkj014U2CQ2Nv0UZeYpE_A')
-
-channels_list_by_id(service, 'snippet,contentDetails,statistics',
-  id: 'UCANLZYMidaCbLQFWXBC95Jg')
 
 
-
-# Sample ruby code for playlists.list
-
-#LIST ALL PLAYLISTS FOR CHANNEL
+#LIST ALL PLAYLISTS FOR CHANNEL BY CHANNEL ID, NOT USED
 def playlists_list_by_channel_id(service, part, **params)
   params = params.delete_if { |p, v| v == ''}
   response = service.list_playlists(part, params)
   #binding.pry
-  #print_results(response)
+  
 end
 
- playlists_list_by_channel_id(service, 'snippet,contentDetails',
-   id: 'UUHkj014U2CQ2Nv0UZeYpE_A',#id
-  max_results: 25)
+ # playlists_list_by_channel_id(service, 'snippet,contentDetails',
+ #   id: 'UUHkj014U2CQ2Nv0UZeYpE_A',#id
+ #  max_results: 25)
 
 
  # playlists_list_by_channel_id(service, 'snippet,contentDetails',
@@ -137,18 +125,25 @@ end
 #DATA FUNCTIONS
 
 
-#FIND ALL SONGS FOR SPECIFIC PLAYLIST BY ID
+#FIND ALL SONGS FOR SPECIFIC PLAYLIST BY  PLAYLIST ID
 def find_all_songs_for_uploads(service, part, playlist, user,  **params)
   params = params.delete_if { |p, v| v == ''}
   response = service.list_playlist_items(part, params)
-  print_results(response, playlist, user)
+  create_videos(response, playlist, user, service)
 end
 
 
 
 ##SEED DATA FUNCTIONS
+#BIEBER CHANNEL
+bieberchannel = create_channel_by_id(service, 'snippet,contentDetails,statistics',
+  id: 'UCHkj014U2CQ2Nv0UZeYpE_A')
 
-bieberchannel = Channel.create(name: "JustinBieberVEVO")
+#TAYLOR SWIFT CHANNEL
+taylorswiftchannel = create_channel_by_id(service, 'snippet,contentDetails,statistics',
+  id: 'UCANLZYMidaCbLQFWXBC95Jg')
+
+
 biebs = Playlist.create(name: "Justin Bieber's Uploads", channel: bieberchannel)
 sean = User.create(first_name: "Sean", last_name: "Huang")
 
@@ -160,7 +155,6 @@ find_all_songs_for_uploads(service, 'snippet,contentDetails',
   )
 
 
-taylorswiftchannel = Channel.create(name:"TaylorSwiftVEVO")
 tswift = Playlist.create(name: "Taylor Swift's Uploads", channel: taylorswiftchannel)
 kenny = User.create(first_name: "Kenny", last_name: "Yang")
 

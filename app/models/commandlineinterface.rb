@@ -2,9 +2,7 @@ require 'pry'
 
 class CommandLineInterface
 
-	def greet(channel)
-
-		if channel.name == "JustinBieberVEVO"
+	def greetbieber
 
 		puts "█████████████████████████▌▌██▌██████████
 ████████████████████▌▌▌▌▌╫▌▌▌╫▌▌████████
@@ -70,9 +68,55 @@ class CommandLineInterface
 ██████████████▌▌█▌▌╫╫╫▌▌▌▌████▌╥╒███████
 ██████████████▌▌▌██▌▌▌▌▌▌▌▌▌█▌╫╒╫███████
 ██████████████▌▌▌█▌▌▌▌▌▌▌▌▌██▌╫╒████████"
-	end#end of if
+	
 
-	if channel.name == "TaylorSwiftVEVO"
+		puts "Welcome to JustinBieberVEVO's Youtube Channel, the command line interface to Justin Bieber!"
+		
+# 		puts "█░═█░══════════░░░░░████░═░█████████████
+# ██═█═───────────══░═████░███████████████
+# ████═══════════─░░██░███████████████████
+# ███░══════════─═─░░██═░█████████████████
+# ███════════════──═░░░█░░████████████████
+# ███═─═══════───═──═█░░█░═░██████████████
+# ███══════─═────────═█░═░░░░░████████████
+# ███═─═══─═─═─═──────═░░░═░░░░█░███░░░░══
+# ███══───═─────────────░██░════════░░░░██
+# ███═──═░░░═────────────═░██░░░░░░░░░░███
+# ███══─════░█░═──────────══████████████░═
+# ███═══─═─══████░───═─═───═██████████████
+# ██░─═─═░█████████░═══─══░███████████████
+# ██═──══████████████═───═░████░██████████
+# ██═───═███░═██═─█░█░────░═─█░═░██████░░░
+# ██░──═──═█░═░═─═───░───══────════█░░═══░
+# ███───═──═░░════───══──══────══════───═░
+# ███──═══─═════─────═───═══─────────────═
+# ██░───═───────────══────═══─────────═─══
+# █──═──══─────────═══────══─────────════░
+# █═─═──═══────────═══────═══───────═════░
+# ██─░═──════──────═══─────═══─────══════░
+# ██═██──════──────══──────══─────══════░░
+# ██─░█──═════─────═───────══──═─══════░░░
+# ██░░█═─══════────═░░═──═░░░───════════░░
+# █████░─═══════─═──███░░████────═══════░░
+# ██████──═══════───░███████═───═─══════░░
+# ██████──════════─────═░──────═─══════░░░
+# ██████░─═══════───────────────══════░═░░
+# ███████─═══════────░██─███░═─════════░░█
+# █░█████═─════════█████████████░═══════░█
+# ░═░█████═══════░█████████████──════░═░██
+# ══░═█████══════──████░█░══██░──═══░═░░██
+# ════██══██═░════─███░░██████─════░░░░███
+# █══███─═███░░═════█████████═─═════░░████
+# █═░░█──░███░█░════─██████░───════░██████
+# ░░░══─═█░██░██░─══──────────═─══░███████
+# ██─░─════██░███═─═───────────══░████████
+# █═─█═══─░░░░████░══─────────══██████████
+# ░══█════█░═░░█████░░═══════░░███████████"
+
+
+	end
+
+	def greetswift
 		puts "█░═█░══════════░░░░░████░═░█████████████
 ██═█═───────────══░═████░███████████████
 ████═══════════─░░██░███████████████████
@@ -113,36 +157,25 @@ class CommandLineInterface
 ██─░─════██░███═─═───────────══░████████
 █═─█═══─░░░░████░══─────────══██████████
 ░══█════█░═░░█████░░═══════░░███████████"
-
-end
-
-		puts "Welcome to #{channel.name}'s Youtube Channel, the command line interface to Justin Bieber!"
+	
+	puts "Welcome to TaylorSwiftVEVO's Youtube Channel, the command line interface to Taylor Swift!"
 	end
 
-	def gets_user_input(channel)
-		puts "We can get you a list of all of #{channel.name}'s songs and playlists!"
-		puts "Enter songs to get started: "
-		input = gets.downcase.strip
 
-		# case input
-		# when 
-			
-		# else 
-		# 	help
-		# end
-
-		#puts input
-	end
 
 	def help
 		help = <<-HELP
 	I accept the following commands:
 	- help : displays this help message
 	- channels : display all available channels
+	- greetbieber: Greet Bieber!
+	- greettaylor: Greet Taylor!
+	- bestsongofalltime: display the most viewed song of all time
 	- bieberplaylist : display all of Justin Bieber's playlists
 	- taylorplaylist : display all of Taylor Swift's playlists
 	- biebersongs: display all of Bieber's songs
 	- taylorsongs: display all of Taylor's songs
+	- destroybieber: destroy Biebz
 	- exit: exit the CLI
 	HELP
 
@@ -189,25 +222,56 @@ _______________________Ju
 			case input
 			when 'channels'
 				Channel.all.each do |channel|
-					#binding.pry
-					greet(channel)
 					puts channel.name
 				end
-			# when 'play'
-			# 	list(songs)
-			# 	play(songs)
+			when 'bestsongofalltime'
+				puts Video.all.max_by {|video| video.views.to_i}.name
+				puts "OFCCCCC!!!"
+
+			when 'greetbieber'
+				greetbieber
+
+			when 'greettaylor'
+				greetswift
+
 			when 'biebersongs'
-				videos = Channel.all[0].playlists[0].videos
+
+				target = Channel.find_by(name: "JustinBieberVEVO")
+				if target == nil
+					puts "Biebz is destroyed!"
+					puts "OFCCCCC!!!"
+					run
+				end
+				#binding.pry
+				videos = target.playlists[0].videos
 
 				videos.each do |video|
 					puts video.name
 				end
 			when 'taylorsongs'
-				videos = Channel.all[1].playlists[0].videos
+				target = Channel.find_by(name: "TaylorSwiftVEVO")
+				videos = target.playlists[0].videos
 
 				videos.each do |video|
 					puts video.name
 				end
+			when 'bieberplaylist'
+				puts Playlist.all.first.name
+
+			when 'taylorplaylist'
+				puts Playlist.all[1].name
+
+			when 'destroybieber'
+				target = Channel.find_by(name: "JustinBieberVEVO")
+				#destroy videos first
+				target.playlists.all.each do |playlist|
+					playlist.videos.destroy_all
+					playlist.destroy
+				end
+
+				target.destroy
+
+				#binding.pry
 			when 'help'
 				help
 			when 'exit'
